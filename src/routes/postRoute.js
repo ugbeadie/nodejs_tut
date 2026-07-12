@@ -7,6 +7,8 @@ import {
   getTeamPosts,
   updatePost,
   deletePost,
+  reassignTask,
+  updateTaskStatus,
 } from "../controllers/postController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 import { authorizeRoles } from "../middlewares/roleMiddleware.js";
@@ -20,5 +22,7 @@ router.patch("/update/:id", protect, updatePost);
 router.get("/user/:userId", protect, authorizeRoles("admin"), getPostsByUser);
 router.delete("/delete/:id", protect, deletePost);
 router.get("/team/:teamId", protect, getTeamPosts);
+router.patch("/:id/reassign", protect, reassignTask);
+router.patch("/:id/status", protect, updateTaskStatus);
 
 export default router;

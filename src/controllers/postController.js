@@ -30,7 +30,7 @@ const updatePost = async (req, res) => {
       return res.status(400).json({ message: "Request body is empty" });
     }
     const post = await Post.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      returnDocument: "after",
     });
     if (!post) {
       return res.status(404).json({ message: "Post not found" });

@@ -4,13 +4,16 @@ import {
   getPosts,
   updatePost,
   deletePost,
+  getMyPosts,
 } from "../controllers/postController.js";
+import { protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/create", createPost);
-router.get("/all", getPosts);
-router.patch("/update/:id", updatePost);
-router.delete("/delete/:id", deletePost);
+router.post("/create", protect, createPost);
+router.get("/all", protect, getPosts);
+router.patch("/update/:id", protect, updatePost);
+router.delete("/delete/:id", protect, deletePost);
+router.get("/my-posts", protect, getMyPosts);
 
 export default router;

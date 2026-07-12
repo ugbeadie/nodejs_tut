@@ -23,11 +23,11 @@ const userSchema = new mongoose.Schema(
       minlength: 6,
       trim: true,
     },
-    // role: {
-    //   type: String,
-    //   required: true,
-    //   enum: ["admin", "manager", "user"],
-    // },
+    role: {
+      type: String,
+      enum: ["admin", "manager", "user"],
+      default: "user",
+    },
   },
   { timestamps: true },
 );

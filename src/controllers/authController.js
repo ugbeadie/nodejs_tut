@@ -40,8 +40,7 @@ const register = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Register error:", error);
-    res.status(500).json({ error: "Something went wrong. Please try again." });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -49,7 +48,7 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ error: "Email and password are required" });
+    return res.status(400).json({ message: "Email and password are required" });
   }
 
   try {
@@ -77,8 +76,7 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ error: "Something went wrong. Please try again." });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 

@@ -1,11 +1,24 @@
 import { Post } from "../models/postModel.js";
+import { Team } from "../models/teamModel.js";
 
 const createPost = async (req, res) => {
   try {
-    const { name, description, age } = req.body;
+    const { name, description, age, teamId } = req.body;
 
-    if (!name || !description || !age) {
+    if (!name || !description || !age || !teamId) {
       return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const team = await Team.findById(teamId);
+
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    if (!team.members.includes(req.user._id.toString())) {
+      return res
+        .status(403)
+        .json({ message: "You are not a member of this team" });
     }
 
     const post = await Post.create({
@@ -13,6 +26,7 @@ const createPost = async (req, res) => {
       description,
       age,
       createdBy: req.user._id,
+      team: teamId,
     });
 
     res.status(201).json({ message: "Post created successfully", post });
@@ -33,6 +47,37 @@ const getPosts = async (req, res) => {
 const getMyPosts = async (req, res) => {
   try {
     const posts = await Post.find({ createdBy: req.user._id });
+    res.status(200).json({ posts });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getPostsByUser = async (req, res) => {
+  try {
+    const posts = await Post.find({ createdBy: req.params.userId });
+    res.status(200).json({ posts });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const getTeamPosts = async (req, res) => {
+  try {
+    const team = await Team.findById(req.params.teamId);
+
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    if (!team.members.includes(req.user._id.toString())) {
+      return res
+        .status(403)
+        .json({ message: "You are not a member of this team" });
+    }
+
+    const posts = await Post.find({ team: req.params.teamId });
+
     res.status(200).json({ posts });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
@@ -80,10 +125,17 @@ const deletePost = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    const isOwner = post.createdBy.toString() === req.user._id.toString();
+    const team = await Team.findById(post.team);
+
+    if (!team) {
+      return res.status(404).json({ message: "Associated team not found" });
+    }
+
+    const isCreator = post.createdBy.toString() === req.user._id.toString();
+    const isTeamOwner = team.owner.toString() === req.user._id.toString();
     const isAdmin = req.user.role === "admin";
 
-    if (!isOwner && !isAdmin) {
+    if (!isCreator && !isTeamOwner && !isAdmin) {
       return res
         .status(403)
         .json({ message: "You do not have permission to delete this post" });
@@ -97,4 +149,12 @@ const deletePost = async (req, res) => {
   }
 };
 
-export { createPost, getPosts, getMyPosts, updatePost, deletePost };
+export {
+  createPost,
+  getPosts,
+  getMyPosts,
+  getPostsByUser,
+  getTeamPosts,
+  updatePost,
+  deletePost,
+};

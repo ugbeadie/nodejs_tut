@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const dbConnect = async () => {
   try {
@@ -8,7 +8,8 @@ const dbConnect = async () => {
     );
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
+    throw error;
   }
 };
 
-module.exports = dbConnect;
+export default dbConnect;

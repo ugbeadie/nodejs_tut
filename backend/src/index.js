@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import dotenv from "dotenv";
 import dbConnect from "./config/dbConnect.js";
 import authRoute from "./routes/authRoute.js";
@@ -8,6 +9,15 @@ import teamRoute from "./routes/teamRoute.js";
 dotenv.config();
 
 const app = express();
+
+// cors() must come before express.json() and before your route mounts because middleware runs top to bottom so order matters here
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;

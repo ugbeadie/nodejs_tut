@@ -1,7 +1,13 @@
-import "./App.css";
+import { AuthProvider } from "./context/AuthContext";
 
-function App() {
-  return <p className="underline">new or</p>;
-}
+const App = () => {
+  return (
+    <AuthProvider>
+      <div className="min-h-screen bg-gray-50">
+        {/* routing goes here once we add pages */}
+      </div>
+    </AuthProvider>
+  );
+};
 
 export default App;

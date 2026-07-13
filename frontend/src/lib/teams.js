@@ -10,6 +10,11 @@ export const fetchAllTeams = async (token) => {
   return data.teams;
 };
 
+export const fetchTeamById = async (id, token) => {
+  const data = await apiRequest(`/teams/${id}`, { method: "GET" }, token);
+  return data.team;
+};
+
 export const createTeam = async (name, token) => {
   const data = await apiRequest(
     "/teams/create",

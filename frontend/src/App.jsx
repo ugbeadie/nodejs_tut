@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
+import TeamDetailPage from "./pages/TeamDetailPage";
 
 const ProtectedRoute = ({ children }) => {
   const { user, sessionLoading } = useAuth();
@@ -37,7 +38,7 @@ const AppRoutes = () => {
         path="/teams/:id"
         element={
           <ProtectedRoute>
-            <div>Team page placeholder</div>
+            <TeamDetailPage />
           </ProtectedRoute>
         }
       />

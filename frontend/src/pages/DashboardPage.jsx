@@ -51,6 +51,9 @@ const DashboardPage = () => {
 
   const handleTeamCreated = (newTeam) => {
     setTeams((prev) => [...prev, newTeam]);
+    if (isAdmin) {
+      setAllTeams((prev) => [...prev, newTeam]);
+    }
   };
 
   return (

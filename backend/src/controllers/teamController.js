@@ -50,6 +50,31 @@ const getAllTeams = async (req, res) => {
   }
 };
 
+const getTeamById = async (req, res) => {
+  try {
+    const team = await Team.findById(req.params.id).populate(TEAM_POPULATE);
+
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
+    const isMember = team.members.some(
+      (member) => member._id.toString() === req.user._id.toString(),
+    );
+    const isAdmin = req.user.role === "admin";
+
+    if (!isMember && !isAdmin) {
+      return res
+        .status(403)
+        .json({ message: "You are not a member of this team" });
+    }
+
+    res.status(200).json({ team });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const addMember = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -136,4 +161,11 @@ const removeMember = async (req, res) => {
   }
 };
 
-export { createTeam, getMyTeams, getAllTeams, addMember, removeMember };
+export {
+  createTeam,
+  getMyTeams,
+  getAllTeams,
+  getTeamById,
+  addMember,
+  removeMember,
+};

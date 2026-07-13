@@ -1,6 +1,12 @@
 import { Post } from "../models/postModel.js";
 import { Team } from "../models/teamModel.js";
 
+const POST_POPULATE = [
+  { path: "createdBy", select: "username email" },
+  { path: "assignedTo", select: "username email" },
+  { path: "team", select: "name" },
+];
+
 const createPost = async (req, res) => {
   try {
     const { name, description, age, teamId, assignedTo } = req.body;
@@ -47,7 +53,11 @@ const createPost = async (req, res) => {
       assignedTo,
     });
 
-    res.status(201).json({ message: "Post created successfully", post });
+    const populatedPost = await Post.findById(post._id).populate(POST_POPULATE);
+
+    res
+      .status(201)
+      .json({ message: "Post created successfully", post: populatedPost });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
@@ -55,7 +65,7 @@ const createPost = async (req, res) => {
 
 const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find();
+    const posts = await Post.find().populate(POST_POPULATE);
     res.status(200).json({ posts });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
@@ -64,7 +74,9 @@ const getPosts = async (req, res) => {
 
 const getMyPosts = async (req, res) => {
   try {
-    const posts = await Post.find({ createdBy: req.user._id });
+    const posts = await Post.find({ createdBy: req.user._id }).populate(
+      POST_POPULATE,
+    );
     res.status(200).json({ posts });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
@@ -73,7 +85,9 @@ const getMyPosts = async (req, res) => {
 
 const getPostsByUser = async (req, res) => {
   try {
-    const posts = await Post.find({ createdBy: req.params.userId });
+    const posts = await Post.find({ createdBy: req.params.userId }).populate(
+      POST_POPULATE,
+    );
     res.status(200).json({ posts });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
@@ -94,7 +108,9 @@ const getTeamPosts = async (req, res) => {
         .json({ message: "You are not a member of this team" });
     }
 
-    const posts = await Post.find({ team: req.params.teamId });
+    const posts = await Post.find({ team: req.params.teamId }).populate(
+      POST_POPULATE,
+    );
 
     res.status(200).json({ posts });
   } catch (error) {
@@ -124,8 +140,8 @@ const updatePost = async (req, res) => {
     }
 
     const updatedPost = await Post.findByIdAndUpdate(req.params.id, req.body, {
-      returnDocument: "after",
-    });
+      new: true,
+    }).populate(POST_POPULATE);
 
     res
       .status(200)
@@ -183,6 +199,10 @@ const reassignTask = async (req, res) => {
 
     const team = await Team.findById(post.team);
 
+    if (!team) {
+      return res.status(404).json({ message: "Associated team not found" });
+    }
+
     const isTeamOwner = team.owner.toString() === req.user._id.toString();
     const isAdmin = req.user.role === "admin";
 
@@ -201,7 +221,11 @@ const reassignTask = async (req, res) => {
     post.assignedTo = assignedTo;
     await post.save();
 
-    res.status(200).json({ message: "Task reassigned successfully", post });
+    const populatedPost = await Post.findById(post._id).populate(POST_POPULATE);
+
+    res
+      .status(200)
+      .json({ message: "Task reassigned successfully", post: populatedPost });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
@@ -231,7 +255,11 @@ const updateTaskStatus = async (req, res) => {
     post.status = status;
     await post.save();
 
-    res.status(200).json({ message: "Status updated successfully", post });
+    const populatedPost = await Post.findById(post._id).populate(POST_POPULATE);
+
+    res
+      .status(200)
+      .json({ message: "Status updated successfully", post: populatedPost });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }

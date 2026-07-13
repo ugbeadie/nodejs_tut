@@ -1,4 +1,10 @@
 import { Team } from "../models/teamModel.js";
+import { User } from "../models/UserModel.js";
+
+const TEAM_POPULATE = [
+  { path: "owner", select: "username email" },
+  { path: "members", select: "username email" },
+];
 
 const createTeam = async (req, res) => {
   try {
@@ -14,7 +20,11 @@ const createTeam = async (req, res) => {
       members: [req.user._id],
     });
 
-    res.status(201).json({ message: "Team created successfully", team });
+    const populatedTeam = await Team.findById(team._id).populate(TEAM_POPULATE);
+
+    res
+      .status(201)
+      .json({ message: "Team created successfully", team: populatedTeam });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
@@ -22,7 +32,9 @@ const createTeam = async (req, res) => {
 
 const getMyTeams = async (req, res) => {
   try {
-    const teams = await Team.find({ members: req.user._id });
+    const teams = await Team.find({ members: req.user._id }).populate(
+      TEAM_POPULATE,
+    );
     res.status(200).json({ teams });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
@@ -52,6 +64,12 @@ const addMember = async (req, res) => {
         .json({ message: "Only the team owner or admin can add members" });
     }
 
+    const userExists = await User.findById(userId);
+
+    if (!userExists) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     if (team.members.includes(userId)) {
       return res.status(409).json({ message: "User is already a member" });
     }
@@ -59,7 +77,11 @@ const addMember = async (req, res) => {
     team.members.push(userId);
     await team.save();
 
-    res.status(200).json({ message: "Member added successfully", team });
+    const populatedTeam = await Team.findById(team._id).populate(TEAM_POPULATE);
+
+    res
+      .status(200)
+      .json({ message: "Member added successfully", team: populatedTeam });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
@@ -68,6 +90,10 @@ const addMember = async (req, res) => {
 const removeMember = async (req, res) => {
   try {
     const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required" });
+    }
 
     const team = await Team.findById(req.params.id);
 
@@ -91,7 +117,11 @@ const removeMember = async (req, res) => {
     team.members = team.members.filter((id) => id.toString() !== userId);
     await team.save();
 
-    res.status(200).json({ message: "Member removed successfully", team });
+    const populatedTeam = await Team.findById(team._id).populate(TEAM_POPULATE);
+
+    res
+      .status(200)
+      .json({ message: "Member removed successfully", team: populatedTeam });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }

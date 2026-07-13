@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const postSchema = new mongoose.Schema(
+const taskSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true },
@@ -29,4 +29,4 @@ const postSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-export const Post = mongoose.model("Post", postSchema);
+export const Task = mongoose.model("Task", taskSchema);

@@ -41,6 +41,15 @@ const getMyTeams = async (req, res) => {
   }
 };
 
+const getAllTeams = async (req, res) => {
+  try {
+    const teams = await Team.find().populate(TEAM_POPULATE);
+    res.status(200).json({ teams });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const addMember = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -127,4 +136,4 @@ const removeMember = async (req, res) => {
   }
 };
 
-export { createTeam, getMyTeams, addMember, removeMember };
+export { createTeam, getMyTeams, getAllTeams, addMember, removeMember };

@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import dbConnect from "./config/dbConnect.js";
 import authRoute from "./routes/authRoute.js";
-import postRoute from "./routes/postRoute.js";
+import taskRoute from "./routes/taskRoute.js";
 import teamRoute from "./routes/teamRoute.js";
 
 dotenv.config();
@@ -27,7 +27,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoute);
-app.use("/api/posts", postRoute);
+app.use("/api/tasks", taskRoute);
 app.use("/api/teams", teamRoute);
 
 const startServer = async () => {

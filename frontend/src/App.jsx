@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import DashboardPage from "./pages/DashboardPage";
 
 const ProtectedRoute = ({ children }) => {
   const { user, sessionLoading } = useAuth();
@@ -28,7 +29,7 @@ const AppRoutes = () => {
         path="/"
         element={
           <ProtectedRoute>
-            <div>Dashboard placeholder</div>
+            <DashboardPage />
           </ProtectedRoute>
         }
       />

@@ -1,13 +1,13 @@
-import { Post } from "../models/postModel.js";
+import { Task } from "../models/taskModel.js";
 import { Team } from "../models/teamModel.js";
 
-const POST_POPULATE = [
+const TASK_POPULATE = [
   { path: "createdBy", select: "username email" },
   { path: "assignedTo", select: "username email" },
   { path: "team", select: "name" },
 ];
 
-const createPost = async (req, res) => {
+const createTask = async (req, res) => {
   try {
     const { name, description, age, teamId, assignedTo } = req.body;
 
@@ -44,7 +44,7 @@ const createPost = async (req, res) => {
         .json({ message: "assignedTo must be a member of this team" });
     }
 
-    const post = await Post.create({
+    const task = await Task.create({
       name,
       description,
       age,
@@ -53,48 +53,48 @@ const createPost = async (req, res) => {
       assignedTo,
     });
 
-    const populatedPost = await Post.findById(post._id).populate(POST_POPULATE);
+    const populatedTask = await Task.findById(task._id).populate(TASK_POPULATE);
 
     res
       .status(201)
-      .json({ message: "Post created successfully", post: populatedPost });
+      .json({ message: "Task created successfully", task: populatedTask });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const getPosts = async (req, res) => {
+const getTasks = async (req, res) => {
   try {
-    const posts = await Post.find().populate(POST_POPULATE);
-    res.status(200).json({ posts });
+    const tasks = await Task.find().populate(TASK_POPULATE);
+    res.status(200).json({ tasks });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const getMyPosts = async (req, res) => {
+const getMyTasks = async (req, res) => {
   try {
-    const posts = await Post.find({ createdBy: req.user._id }).populate(
-      POST_POPULATE,
+    const tasks = await Task.find({ createdBy: req.user._id }).populate(
+      TASK_POPULATE,
     );
-    res.status(200).json({ posts });
+    res.status(200).json({ tasks });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const getPostsByUser = async (req, res) => {
+const getTasksByUser = async (req, res) => {
   try {
-    const posts = await Post.find({ createdBy: req.params.userId }).populate(
-      POST_POPULATE,
+    const tasks = await Task.find({ createdBy: req.params.userId }).populate(
+      TASK_POPULATE,
     );
-    res.status(200).json({ posts });
+    res.status(200).json({ tasks });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const getTeamPosts = async (req, res) => {
+const getTeamTasks = async (req, res) => {
   try {
     const team = await Team.findById(req.params.teamId);
 
@@ -108,76 +108,76 @@ const getTeamPosts = async (req, res) => {
         .json({ message: "You are not a member of this team" });
     }
 
-    const posts = await Post.find({ team: req.params.teamId }).populate(
-      POST_POPULATE,
+    const tasks = await Task.find({ team: req.params.teamId }).populate(
+      TASK_POPULATE,
     );
 
-    res.status(200).json({ posts });
+    res.status(200).json({ tasks });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const updatePost = async (req, res) => {
+const updateTask = async (req, res) => {
   try {
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: "Request body is empty" });
     }
 
-    const post = await Post.findById(req.params.id);
+    const task = await Task.findById(req.params.id);
 
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
     }
 
-    const isOwner = post.createdBy.toString() === req.user._id.toString();
+    const isOwner = task.createdBy.toString() === req.user._id.toString();
     const isAdmin = req.user.role === "admin";
 
     if (!isOwner && !isAdmin) {
       return res
         .status(403)
-        .json({ message: "You do not have permission to edit this post" });
+        .json({ message: "You do not have permission to edit this task" });
     }
 
-    const updatedPost = await Post.findByIdAndUpdate(req.params.id, req.body, {
+    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-    }).populate(POST_POPULATE);
+    }).populate(TASK_POPULATE);
 
     res
       .status(200)
-      .json({ message: "Post updated successfully", post: updatedPost });
+      .json({ message: "Task updated successfully", task: updatedTask });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const deletePost = async (req, res) => {
+const deleteTask = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const task = await Task.findById(req.params.id);
 
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
     }
 
-    const team = await Team.findById(post.team);
+    const team = await Team.findById(task.team);
 
     if (!team) {
       return res.status(404).json({ message: "Associated team not found" });
     }
 
-    const isCreator = post.createdBy.toString() === req.user._id.toString();
+    const isCreator = task.createdBy.toString() === req.user._id.toString();
     const isTeamOwner = team.owner.toString() === req.user._id.toString();
     const isAdmin = req.user.role === "admin";
 
     if (!isCreator && !isTeamOwner && !isAdmin) {
       return res
         .status(403)
-        .json({ message: "You do not have permission to delete this post" });
+        .json({ message: "You do not have permission to delete this task" });
     }
 
-    await Post.findByIdAndDelete(req.params.id);
+    await Task.findByIdAndDelete(req.params.id);
 
-    res.status(200).json({ message: "Post deleted successfully" });
+    res.status(200).json({ message: "Task deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
@@ -191,13 +191,13 @@ const reassignTask = async (req, res) => {
       return res.status(400).json({ message: "assignedTo is required" });
     }
 
-    const post = await Post.findById(req.params.id);
+    const task = await Task.findById(req.params.id);
 
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
     }
 
-    const team = await Team.findById(post.team);
+    const team = await Team.findById(task.team);
 
     if (!team) {
       return res.status(404).json({ message: "Associated team not found" });
@@ -218,14 +218,14 @@ const reassignTask = async (req, res) => {
         .json({ message: "assignedTo must be a member of this team" });
     }
 
-    post.assignedTo = assignedTo;
-    await post.save();
+    task.assignedTo = assignedTo;
+    await task.save();
 
-    const populatedPost = await Post.findById(post._id).populate(POST_POPULATE);
+    const populatedTask = await Task.findById(task._id).populate(TASK_POPULATE);
 
     res
       .status(200)
-      .json({ message: "Task reassigned successfully", post: populatedPost });
+      .json({ message: "Task reassigned successfully", task: populatedTask });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
@@ -240,39 +240,39 @@ const updateTaskStatus = async (req, res) => {
       return res.status(400).json({ message: "Valid status is required" });
     }
 
-    const post = await Post.findById(req.params.id);
+    const task = await Task.findById(req.params.id);
 
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
     }
 
-    if (post.assignedTo.toString() !== req.user._id.toString()) {
+    if (task.assignedTo.toString() !== req.user._id.toString()) {
       return res
         .status(403)
         .json({ message: "Only the assigned user can update task status" });
     }
 
-    post.status = status;
-    await post.save();
+    task.status = status;
+    await task.save();
 
-    const populatedPost = await Post.findById(post._id).populate(POST_POPULATE);
+    const populatedTask = await Task.findById(task._id).populate(TASK_POPULATE);
 
     res
       .status(200)
-      .json({ message: "Status updated successfully", post: populatedPost });
+      .json({ message: "Status updated successfully", task: populatedTask });
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
 export {
-  createPost,
-  getPosts,
-  getMyPosts,
-  getPostsByUser,
-  getTeamPosts,
-  updatePost,
-  deletePost,
+  createTask,
+  getTasks,
+  getMyTasks,
+  getTasksByUser,
+  getTeamTasks,
+  updateTask,
+  deleteTask,
   reassignTask,
   updateTaskStatus,
 };

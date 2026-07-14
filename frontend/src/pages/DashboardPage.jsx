@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { fetchMyTeams, fetchAllTeams } from "../lib/teams";
 import { TeamCard } from "../components/TeamCard";
@@ -57,10 +58,16 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 px-4">
+    <div className="max-w-2xl mx-auto pt-10 px-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-semibold text-gray-900">My Teams</h1>
         <div className="flex items-center gap-3">
+          <Link
+            to="/my-tasks"
+            className="text-sm text-blue-600 hover:underline"
+          >
+            My Tasks
+          </Link>
           <span className="text-sm text-gray-500">{user?.username}</span>
           <LogoutButton />
         </div>

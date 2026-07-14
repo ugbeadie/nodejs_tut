@@ -13,6 +13,7 @@ const TeamDetailPage = () => {
   const { token, user } = useAuth();
   const [team, setTeam] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [taskFilter, setTaskFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [tasksLoading, setTasksLoading] = useState(true);
   const [error, setError] = useState("");
@@ -75,6 +76,10 @@ const TeamDetailPage = () => {
   if (!team) return null;
 
   const canManageMembers = team.owner._id === user._id || user.role === "admin";
+  const visibleTasks =
+    taskFilter === "mine"
+      ? tasks.filter((t) => t.assignedTo._id === user._id)
+      : tasks;
 
   return (
     <div className="max-w-2xl mx-auto pt-10 px-4 pb-10">
@@ -98,7 +103,20 @@ const TeamDetailPage = () => {
       </div>
 
       <div className="mt-10 pt-6 border-t border-gray-200">
-        <h2 className="text-sm font-medium text-gray-700 mb-3">Tasks</h2>
+        <div className="flex gap-2 mb-3">
+          <button
+            onClick={() => setTaskFilter("all")}
+            className={`text-sm px-3 py-1.5 rounded-md ${taskFilter === "all" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600"}`}
+          >
+            All Tasks
+          </button>
+          <button
+            onClick={() => setTaskFilter("mine")}
+            className={`text-sm px-3 py-1.5 rounded-md ${taskFilter === "mine" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-600"}`}
+          >
+            My Tasks
+          </button>
+        </div>
 
         {tasksLoading && (
           <p className="text-sm text-gray-500">Loading tasks...</p>
@@ -107,7 +125,7 @@ const TeamDetailPage = () => {
 
         {!tasksLoading && !tasksError && (
           <TaskList
-            tasks={tasks}
+            tasks={visibleTasks}
             team={team}
             onUpdated={handleTaskUpdated}
             onDeleted={handleTaskDeleted}

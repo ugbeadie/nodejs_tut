@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import TeamDetailPage from "./pages/TeamDetailPage";
+import MyTasksPage from "./pages/MyTasksPage";
 
 const ProtectedRoute = ({ children }) => {
   const { user, sessionLoading } = useAuth();
@@ -46,7 +47,7 @@ const AppRoutes = () => {
         path="/my-tasks"
         element={
           <ProtectedRoute>
-            <div>My tasks placeholder</div>
+            <MyTasksPage />
           </ProtectedRoute>
         }
       />

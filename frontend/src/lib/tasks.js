@@ -9,6 +9,11 @@ export const fetchTeamTasks = async (teamId, token) => {
   return data.tasks;
 };
 
+export const fetchMyTasks = async (token) => {
+  const data = await apiRequest("/tasks/my-tasks", { method: "GET" }, token);
+  return data.tasks;
+};
+
 export const createTask = async (taskData, token) => {
   const data = await apiRequest(
     "/tasks/create",

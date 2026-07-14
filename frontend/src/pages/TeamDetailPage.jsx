@@ -56,6 +56,16 @@ const TeamDetailPage = () => {
     setTasks((prev) => [...prev, newTask]);
   };
 
+  const handleTaskUpdated = (updatedTask) => {
+    setTasks((prev) =>
+      prev.map((t) => (t._id === updatedTask._id ? updatedTask : t)),
+    );
+  };
+
+  const handleTaskDeleted = (taskId) => {
+    setTasks((prev) => prev.filter((t) => t._id !== taskId));
+  };
+
   if (loading)
     return (
       <p className="text-sm text-gray-500 mt-10 text-center">Loading team...</p>
@@ -95,7 +105,14 @@ const TeamDetailPage = () => {
         )}
         {tasksError && <p className="text-sm text-red-600">{tasksError}</p>}
 
-        {!tasksLoading && !tasksError && <TaskList tasks={tasks} />}
+        {!tasksLoading && !tasksError && (
+          <TaskList
+            tasks={tasks}
+            team={team}
+            onUpdated={handleTaskUpdated}
+            onDeleted={handleTaskDeleted}
+          />
+        )}
       </div>
     </div>
   );

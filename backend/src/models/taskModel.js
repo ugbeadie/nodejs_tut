@@ -4,7 +4,11 @@ const taskSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true },
-    age: { type: Number, required: true },
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high"],
+      default: "medium",
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

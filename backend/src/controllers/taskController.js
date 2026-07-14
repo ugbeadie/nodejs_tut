@@ -9,9 +9,9 @@ const TASK_POPULATE = [
 
 const createTask = async (req, res) => {
   try {
-    const { name, description, age, teamId, assignedTo } = req.body;
+    const { name, description, priority, teamId, assignedTo } = req.body;
 
-    if (!name || !description || !age || !teamId || !assignedTo) {
+    if (!name || !description || !teamId || !assignedTo) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -21,7 +21,10 @@ const createTask = async (req, res) => {
       return res.status(404).json({ message: "Team not found" });
     }
 
-    if (!team.members.includes(req.user._id.toString())) {
+    const isAdmin = req.user.role === "admin";
+    const isMember = team.members.includes(req.user._id.toString());
+
+    if (!isMember && !isAdmin) {
       return res
         .status(403)
         .json({ message: "You are not a member of this team" });
@@ -29,7 +32,6 @@ const createTask = async (req, res) => {
 
     const isSelfAssigning = assignedTo === req.user._id.toString();
     const isTeamOwner = team.owner.toString() === req.user._id.toString();
-    const isAdmin = req.user.role === "admin";
 
     if (!isSelfAssigning && !isTeamOwner && !isAdmin) {
       return res.status(403).json({
@@ -47,7 +49,7 @@ const createTask = async (req, res) => {
     const task = await Task.create({
       name,
       description,
-      age,
+      priority,
       createdBy: req.user._id,
       team: teamId,
       assignedTo,
@@ -102,7 +104,10 @@ const getTeamTasks = async (req, res) => {
       return res.status(404).json({ message: "Team not found" });
     }
 
-    if (!team.members.includes(req.user._id.toString())) {
+    const isAdmin = req.user.role === "admin";
+    const isMember = team.members.includes(req.user._id.toString());
+
+    if (!isMember && !isAdmin) {
       return res
         .status(403)
         .json({ message: "You are not a member of this team" });
@@ -246,7 +251,10 @@ const updateTaskStatus = async (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    if (task.assignedTo.toString() !== req.user._id.toString()) {
+    const isAssignee = task.assignedTo.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === "admin";
+
+    if (!isAssignee && !isAdmin) {
       return res
         .status(403)
         .json({ message: "Only the assigned user can update task status" });

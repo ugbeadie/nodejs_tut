@@ -23,3 +23,12 @@ export const createTeam = async (name, token) => {
   );
   return data.team;
 };
+
+export const addMember = async (teamId, userId, token) => {
+  const data = await apiRequest(
+    `/teams/${teamId}/add-member`,
+    { method: "POST", body: JSON.stringify({ userId }) },
+    token,
+  );
+  return data.team;
+};

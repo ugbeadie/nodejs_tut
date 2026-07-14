@@ -93,4 +93,29 @@ const getMe = async (req, res) => {
   }
 };
 
-export { register, login, logout, getMe };
+const searchUsers = async (req, res) => {
+  try {
+    const { search } = req.query;
+
+    if (!search || search.trim().length < 2) {
+      return res
+        .status(400)
+        .json({ message: "Search query must be at least 2 characters" });
+    }
+
+    const users = await User.find({
+      $or: [
+        { username: { $regex: search.trim(), $options: "i" } },
+        { email: { $regex: search.trim(), $options: "i" } },
+      ],
+    })
+      .select("username email")
+      .limit(10);
+
+    res.status(200).json({ users });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export { register, login, logout, getMe, searchUsers };

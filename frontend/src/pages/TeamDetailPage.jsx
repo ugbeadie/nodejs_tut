@@ -5,6 +5,7 @@ import { fetchTeamById } from "../lib/teams";
 import { fetchTeamTasks } from "../lib/tasks";
 import { MemberList } from "../components/MemberList";
 import { AddMemberForm } from "../components/AddMemberForm";
+import { TransferMemberForm } from "../components/TransferMemberForm";
 import { TaskList } from "../components/TaskList";
 import { CreateTaskForm } from "../components/CreateTaskForm";
 
@@ -54,7 +55,7 @@ const TeamDetailPage = () => {
   }, [id, token]);
 
   const handleTaskCreated = (newTask) => {
-    setTasks((prev) => [...prev, newTask]);
+    setTasks((prev) => [newTask, ...prev]);
   };
 
   const handleTaskUpdated = (updatedTask) => {
@@ -75,7 +76,8 @@ const TeamDetailPage = () => {
     return <p className="text-sm text-red-600 mt-10 text-center">{error}</p>;
   if (!team) return null;
 
-  const canManageMembers = team.owner._id === user._id || user.role === "admin";
+  const isAdmin = user.role === "admin";
+  const canManageMembers = team.owner._id === user._id || isAdmin;
   const visibleTasks =
     taskFilter === "mine"
       ? tasks.filter((t) => t.assignedTo._id === user._id)
@@ -91,11 +93,17 @@ const TeamDetailPage = () => {
         {team.name}
       </h1>
 
-      <MemberList team={team} />
+      <MemberList
+        team={team}
+        onMemberRemoved={setTeam}
+        canManage={canManageMembers}
+      />
 
       {canManageMembers && (
         <AddMemberForm teamId={team._id} onMemberAdded={setTeam} />
       )}
+
+      {isAdmin && <TransferMemberForm team={team} onTransferred={setTeam} />}
 
       <div className="mt-10 pt-6 border-t border-gray-200">
         <h2 className="text-sm font-medium text-gray-700 mb-3">Create Task</h2>

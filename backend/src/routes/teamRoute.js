@@ -6,6 +6,7 @@ import {
   getTeamById,
   addMember,
   removeMember,
+  transferMember,
 } from "../controllers/teamController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 import { authorizeRoles } from "../middlewares/roleMiddleware.js";
@@ -18,5 +19,11 @@ router.get("/all", protect, authorizeRoles("admin"), getAllTeams);
 router.get("/:id", protect, getTeamById);
 router.post("/:id/add-member", protect, addMember);
 router.post("/:id/remove-member", protect, removeMember);
+router.post(
+  "/:id/transfer-member",
+  protect,
+  authorizeRoles("admin"),
+  transferMember,
+);
 
 export default router;

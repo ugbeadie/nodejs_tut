@@ -32,3 +32,21 @@ export const addMember = async (teamId, userId, token) => {
   );
   return data.team;
 };
+
+export const removeMember = async (teamId, userId, token) => {
+  const data = await apiRequest(
+    `/teams/${teamId}/remove-member`,
+    { method: "POST", body: JSON.stringify({ userId }) },
+    token,
+  );
+  return data.team;
+};
+
+export const transferMember = async (teamId, userId, toTeamId, mode, token) => {
+  const data = await apiRequest(
+    `/teams/${teamId}/transfer-member`,
+    { method: "POST", body: JSON.stringify({ userId, toTeamId, mode }) },
+    token,
+  );
+  return data;
+};

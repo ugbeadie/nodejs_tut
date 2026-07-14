@@ -1,5 +1,6 @@
 import { Team } from "../models/teamModel.js";
 import { User } from "../models/UserModel.js";
+import { Task } from "../models/taskModel.js";
 
 const TEAM_POPULATE = [
   { path: "owner", select: "username email" },
@@ -161,6 +162,101 @@ const removeMember = async (req, res) => {
   }
 };
 
+const transferMember = async (req, res) => {
+  try {
+    const { userId, toTeamId, mode } = req.body;
+
+    if (!userId || !toTeamId || !mode) {
+      return res
+        .status(400)
+        .json({ message: "userId, toTeamId, and mode are required" });
+    }
+
+    if (!["move", "copy"].includes(mode)) {
+      return res.status(400).json({ message: "mode must be 'move' or 'copy'" });
+    }
+
+    const fromTeam = await Team.findById(req.params.id);
+
+    if (!fromTeam) {
+      return res.status(404).json({ message: "Source team not found" });
+    }
+
+    const toTeam = await Team.findById(toTeamId);
+
+    if (!toTeam) {
+      return res.status(404).json({ message: "Destination team not found" });
+    }
+
+    if (fromTeam._id.toString() === toTeam._id.toString()) {
+      return res
+        .status(400)
+        .json({ message: "Source and destination teams must be different" });
+    }
+
+    if (!fromTeam.members.includes(userId)) {
+      return res
+        .status(400)
+        .json({ message: "User is not a member of the source team" });
+    }
+
+    if (userId === fromTeam.owner.toString()) {
+      return res
+        .status(400)
+        .json({ message: "Cannot transfer the team owner" });
+    }
+
+    if (toTeam.members.includes(userId)) {
+      return res
+        .status(400)
+        .json({ message: "User is already a member of the destination team" });
+    }
+
+    if (mode === "move") {
+      const activeTasks = await Task.find({
+        team: fromTeam._id,
+        assignedTo: userId,
+        status: { $ne: "completed" },
+      });
+
+      if (activeTasks.length > 0) {
+        return res.status(400).json({
+          message:
+            "Cannot move this member — they have unfinished tasks in the source team",
+        });
+      }
+    }
+
+    toTeam.members.push(userId);
+    await toTeam.save();
+
+    if (mode === "move") {
+      fromTeam.members = fromTeam.members.filter(
+        (id) => id.toString() !== userId,
+      );
+      await fromTeam.save();
+    }
+
+    const populatedFromTeam = await Team.findById(fromTeam._id).populate(
+      TEAM_POPULATE,
+    );
+    const populatedToTeam = await Team.findById(toTeam._id).populate(
+      TEAM_POPULATE,
+    );
+
+    res.status(200).json({
+      message:
+        mode === "move"
+          ? "Member moved successfully"
+          : "Member added to destination team",
+      fromTeam: populatedFromTeam,
+      toTeam: populatedToTeam,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export {
   createTeam,
   getMyTeams,
@@ -168,4 +264,5 @@ export {
   getTeamById,
   addMember,
   removeMember,
+  transferMember,
 };

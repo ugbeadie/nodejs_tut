@@ -10,7 +10,6 @@ dotenv.config();
 
 const app = express();
 
-// cors() must come before express.json() and before your route mounts because middleware runs top to bottom so order matters here
 app.use(
   cors({
     origin: "http://localhost:5173",

@@ -33,3 +33,7 @@ logs/
 **/dist
 **/dist-ssr
 **/build
+
+# manuals
+nodejs_learning_guide.pdf
+interview_answer.md
